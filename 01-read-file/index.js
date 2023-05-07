@@ -8,5 +8,5 @@ const readableStream = fs.createReadStream(finalPath, 'utf-8');
 let data = '';
 
 readableStream.on('data', chunk => data += chunk);
-readableStream.on('end', () => console.log(data));
+readableStream.on('end', () => process.stdout.write(data));
 readableStream.on('error', err => console.log(err.message));
