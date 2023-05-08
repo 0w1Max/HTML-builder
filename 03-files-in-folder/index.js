@@ -12,9 +12,10 @@ fs.readdir(finalPath, { withFileTypes: true }, (err, files) => {
       fs.stat(path.join(finalPath, file.name), (err, stats) => {
         if (err) console.log(err.message);
 
+        const name = path.parse(file.name).name;
         const ext = path.extname(file.name).slice(1);
-        const size = (stats.size / 1024).toFixed(1);
-        const output = `${file.name} - ${ext} - ${size}kb\n`;
+        const size = (stats.size / 1024).toFixed(3);
+        const output = `${name} - ${ext} - ${size}kb\n`;
 
         stdout.write(output);
       })
