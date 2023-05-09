@@ -9,27 +9,54 @@ const createDir = async (dir) => {
   await fsPromises.mkdir(dir, {recursive: true});
 }
 
-// const unlinkFiles = async () => {
-  // copiedFiles.forEach(async file => {
-  //   const copiedFile = path.join(dist, file.name);
-  //   console.log('Unlink ' + file.name);
+// const isEmptyDir = async (path) => {  
+//   try {
+//     const dir = await fsPromises.opendir(path);
+//     const entry = await dir.read();
 
-  //   await fsPromises.unlink(copiedFile);
-  // });
+//     await directory.close();
+//     return entry === null;
+//   } catch (error) {
+//     return false;
+//   }
+// }
+
+// const removeFiles = async () => {
+//   await createDir(dist);
+
+//   const copiedPath = path.join(dist, 'assets');
+//   const copyAssets = await fsPromises.readdir(dist, { withFileTypes: true });
+  
+//   copyAssets.forEach(async dir => {
+//     if (dir.name === 'assets') {
+//       const copiedFiles = await fsPromises.readdir(copiedPath, { withFileTypes: true });
+
+//       copiedFiles.forEach(async file => {
+//         if (file) {
+//           const copy = path.join(copiedPath, file.name);
+
+//           if (file.isDirectory()) {
+//             const currentDir = await fsPromises.readdir(copy, { withFileTypes: true });
+//             currentDir.forEach(async files => {
+//               if (files && files.isFile()) {
+//                 await fsPromises.unlink(path.join(copy, files.name));
+//                 console.log('Unlink ' + files.name);
+//               }
+//             });
+
+//             await fsPromises.rmdir(copy, {recursive: true});
+//             console.log('Deleted ' + file.name);
+//           }
+//         }
+//       });
+//     }
+//   });
 // };
 
 const copyDir = async (srcDir, newDir) => {
   await createDir(newDir);
 
   const originFiles = await fsPromises.readdir(srcDir, { withFileTypes: true });
-  // const copiedFiles = await fsPromises.readdir(dist, { withFileTypes: true });
-
-  // copiedFiles.forEach(async file => {
-  //   const copiedFile = path.join(dist, file.name);
-  //   console.log('Unlink ' + file.name);
-
-  //   await fsPromises.unlink(copiedFile);
-  // });
 
   originFiles.forEach(async file => {
     if (file.isDirectory()) {;
@@ -44,8 +71,22 @@ const copyDir = async (srcDir, newDir) => {
       const originFile = path.join(srcDir, file.name);
       const copiedFile = path.join(newDir, file.name);
 
-      await fsPromises.copyFile(originFile, copiedFile);
+      fsPromises.copyFile(originFile, copiedFile);
     }
+  });
+};
+
+const generateTemplates = async () => {
+  let template = await fsPromises.readFile(path.join(__dirname, 'template.html'), 'utf-8')
+  const componentsList = Array.from(template.match(/{{([^{}]+)}}/g));
+
+  componentsList.forEach(async componentName => {
+    const componentPath = path.join(components, `${componentName.slice(2, -2)}.html`);
+
+    const componentFile = await fsPromises.readFile(componentPath, 'utf-8');
+    template = await template.replaceAll(componentName, componentFile);
+
+    fsPromises.writeFile(path.join(dist, 'index.html'), template, 'utf-8');
   });
 };
 
@@ -65,5 +106,7 @@ const createStyles = async () => {
   });
 };
 
+// removeFiles();
 copyDir(assets, dist);
+generateTemplates();
 createStyles();
