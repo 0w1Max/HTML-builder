@@ -93,7 +93,9 @@ const createStyles = async () => {
   });
 };
 
-removeFiles();
-copyDir(assets, dist);
-generateTemplates();
-createStyles();
+(async () => {
+  await removeFiles();
+  await copyDir(assets, dist);
+  await generateTemplates();
+  await createStyles();
+})();
